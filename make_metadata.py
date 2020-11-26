@@ -7,8 +7,9 @@ from model_bl import D_VECTOR
 from collections import OrderedDict
 import numpy as np
 import torch
+from torch_utils import device
 
-C = D_VECTOR(dim_input=80, dim_cell=768, dim_emb=256).eval().cuda()
+C = D_VECTOR(dim_input=80, dim_cell=768, dim_emb=256).eval().to(device)
 c_checkpoint = torch.load('3000000-BL.ckpt')
 new_state_dict = OrderedDict()
 for key, val in c_checkpoint['model_b'].items():
@@ -30,7 +31,7 @@ for speaker in sorted(subdirList):
     utterances = []
     utterances.append(speaker)
     _, _, fileList = next(os.walk(os.path.join(dirName,speaker)))
-    
+
     # make speaker embedding
     assert len(fileList) >= num_uttrs
     idx_uttrs = np.random.choice(len(fileList), size=num_uttrs, replace=False)
@@ -44,16 +45,15 @@ for speaker in sorted(subdirList):
             tmp = np.load(os.path.join(dirName, speaker, fileList[idx_alt]))
             candidates = np.delete(candidates, np.argwhere(candidates==idx_alt))
         left = np.random.randint(0, tmp.shape[0]-len_crop)
-        melsp = torch.from_numpy(tmp[np.newaxis, left:left+len_crop, :]).cuda()
+        melsp = torch.from_numpy(tmp[np.newaxis, left:left+len_crop, :]).to(device)
         emb = C(melsp)
-        embs.append(emb.detach().squeeze().cpu().numpy())     
+        embs.append(emb.detach().squeeze().cpu().numpy())
     utterances.append(np.mean(embs, axis=0))
-    
+
     # create file list
     for fileName in sorted(fileList):
         utterances.append(os.path.join(speaker,fileName))
     speakers.append(utterances)
-    
+
 with open(os.path.join(rootDir, 'train.pkl'), 'wb') as handle:
     pickle.dump(speakers, handle)
-

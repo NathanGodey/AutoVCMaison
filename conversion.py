@@ -4,18 +4,18 @@ import torch
 import numpy as np
 from math import ceil
 from model_vc import Generator
-
+from torch_utils import device
 
 def pad_seq(x, base=32):
     len_out = int(base * ceil(float(x.shape[0])/base))
     len_pad = len_out - x.shape[0]
     assert len_pad >= 0
     return np.pad(x, ((0,len_pad),(0,0)), 'constant'), len_pad
-device = 'cuda:0'
+
 G = Generator(32,256,512,32).eval().to(device)
-g_checkpoint = torch.load('autovc.ckpt')
+g_checkpoint = torch.load('autovc.ckpt', map_location=device)
 G.load_state_dict(g_checkpoint['model'])
-metadata = pickle.load(open('metadata.pkl', \"rb\"))
+metadata = pickle.load(open('metadata.pkl', "rb"))
 spect_vc = []
 for sbmt_i in metadata:
     x_org = sbmt_i[2]
