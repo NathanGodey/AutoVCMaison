@@ -1,3 +1,6 @@
 *.wav
 *.pkl
 venv
+*.pth
+*.ckpt
+__pycache__
