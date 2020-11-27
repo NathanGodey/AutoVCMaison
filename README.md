@@ -34,16 +34,10 @@ The audio demo for AUTOVC can be found [here](https://auspicious3000.github.io/a
 | [link](https://drive.google.com/file/d/1SZPPnWAgpGrh0gQ7bXQJXXjOntbh4hmz/view?usp=sharing)| [link](https://drive.google.com/file/d/1ORAeb4DlS_65WDkQN6LHx5dPyCM5PAVV/view?usp=sharing) | [link](https://drive.google.com/file/d/1Zksy0ndlDezo9wclQNZYkGi_6i7zi4nQ/view?usp=sharing) |
 
 
-### 0.Convert Mel-Spectrograms
+### 0.Voice Conversion
+If you want to apply the style of indiviual p228 to the file ```p225/p225_003.wav```, run :
+```python converter.py --source='p225/p225_003.wav' --target='p228'```
 
-Download pre-trained AUTOVC model, and run the ```conversion.ipynb``` in the same directory.
-
-
-### 1.Mel-Spectrograms to waveform
-
-Download pre-trained WaveNet Vocoder model, and run the ```vocoder.ipynb``` in the same the directory.
-
-Please note the training metadata and testing metadata have different formats.
 
 
 ### 2.Train model
