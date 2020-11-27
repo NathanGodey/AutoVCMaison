@@ -26,6 +26,9 @@ source_person = args.source.split('/')[0]
 source_file = '__'.join(args.source.split('/')[1:])
 target_person = args.target.split('/')[0]
 
+if not os.path.isdir(args.outputFolder):
+    os.mkdir(args.outputFolder)
+
 def pad_seq(x, base=32):
     len_out = int(base * ceil(float(x.shape[0])/base))
     len_pad = len_out - x.shape[0]
