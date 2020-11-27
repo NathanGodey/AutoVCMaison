@@ -5,6 +5,7 @@ import time
 import datetime
 import os
 
+from torch_utils import device
 
 class Solver(object):
 
@@ -24,22 +25,21 @@ class Solver(object):
         # Training configurations.
         self.batch_size = config.batch_size
         self.num_iters = config.num_iters
-        
+
         # Miscellaneous.
-        self.use_cuda = torch.cuda.is_available()
-        self.device = torch.device('cuda:0' if self.use_cuda else 'cpu')
+        self.device = device
         self.log_step = config.log_step
 
         # Build the model and tensorboard.
         self.build_model()
 
-            
+
     def build_model(self):
-        
-        self.G = Generator(self.dim_neck, self.dim_emb, self.dim_pre, self.freq)        
-        
+
+        self.G = Generator(self.dim_neck, self.dim_emb, self.dim_pre, self.freq)
+
         self.g_optimizer = torch.optim.Adam(self.G.parameters(), 0.0001)
-        
+
         self.G.to(self.device)
         
     
@@ -56,22 +56,23 @@ class Solver(object):
         else:
             print("No checkpoint found, starting from scratch")
 
+
     def reset_grad(self):
         """Reset the gradient buffers."""
         self.g_optimizer.zero_grad()
-      
-    
+
+
     #=====================================================================================================================================#
-    
-    
-                
+
+
+
     def train(self):
         # Set data loader.
         data_loader = self.vcc_loader
-        
+
         # Print logs in specified order
         keys = ['G/loss_id','G/loss_id_psnt','G/loss_cd']
-            
+
         # Start training.
         print('Start training...')
         start_time = time.time()
@@ -87,23 +88,23 @@ class Solver(object):
             except:
                 data_iter = iter(data_loader)
                 x_real, emb_org = next(data_iter)
-            
-            
-            x_real = x_real.to(self.device) 
-            emb_org = emb_org.to(self.device) 
-                        
-       
+
+
+            x_real = x_real.to(self.device)
+            emb_org = emb_org.to(self.device)
+
+
             # =================================================================================== #
             #                               2. Train the generator                                #
             # =================================================================================== #
-            
+
             self.G = self.G.train()
-                        
+
             # Identity mapping loss
             x_identic, x_identic_psnt, code_real = self.G(x_real, emb_org, emb_org)
-            g_loss_id = F.mse_loss(x_real, x_identic)   
-            g_loss_id_psnt = F.mse_loss(x_real, x_identic_psnt)   
-            
+            g_loss_id = F.mse_loss(x_real, x_identic)
+            g_loss_id_psnt = F.mse_loss(x_real, x_identic_psnt)
+
             # Code semantic loss.
             code_reconst = self.G(x_identic_psnt, emb_org, None)
             g_loss_cd = F.l1_loss(code_real, code_reconst)
@@ -133,9 +134,3 @@ class Solver(object):
                 for tag in keys:
                     log += ", {}: {:.4f}".format(tag, loss[tag])
                 print(log)
-                
-
-    
-    
-
-    
