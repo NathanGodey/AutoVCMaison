@@ -4,3 +4,4 @@ venv
 *.pth
 *.ckpt
 __pycache__
+*.npy
