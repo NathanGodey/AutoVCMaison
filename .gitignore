@@ -1,3 +1,9 @@
 *.wav
 *.pkl
 venv
+env
+.npy
+.vscode
+__pycache__
+spmel
+autovc.ckpt

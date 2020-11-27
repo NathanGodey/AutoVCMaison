@@ -13,11 +13,12 @@ def main(config):
     cudnn.benchmark = True
 
     # Data loader.
-    vcc_loader = get_loader(config.data_dir, config.batch_size, config.len_crop)
+    vcc_loader = get_loader(config.dataset + '/spmel', config.batch_size, config.len_crop)
     
     solver = Solver(vcc_loader, config)
 
     solver.train()
+    solver.save_model(config.dataset + '/' + config.checkpoint)
         
     
         
@@ -32,10 +33,13 @@ if __name__ == '__main__':
     parser.add_argument('--dim_pre', type=int, default=512)
     parser.add_argument('--freq', type=int, default=16)
     
+    # Checkpoint path
+    parser.add_argument('--checkpoint', type=str, default='autovc.ckpt')
+
     # Training configuration.
-    parser.add_argument('--data_dir', type=str, default='./spmel')
+    parser.add_argument('--dataset', type=str, default="training_set", help='dataset dir')
     parser.add_argument('--batch_size', type=int, default=2, help='mini-batch size')
-    parser.add_argument('--num_iters', type=int, default=1000000, help='number of total iterations')
+    parser.add_argument('--num_iters', type=int, default=10, help='number of total iterations')
     parser.add_argument('--len_crop', type=int, default=128, help='dataloader output sequence length')
     
     # Miscellaneous.

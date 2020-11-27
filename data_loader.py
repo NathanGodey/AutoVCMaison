@@ -13,6 +13,7 @@ class Utterances(data.Dataset):
     def __init__(self, root_dir, len_crop):
         """Initialize and preprocess the Utterances dataset."""
         self.root_dir = root_dir
+        print(root_dir)
         self.len_crop = len_crop
         self.step = 10
         

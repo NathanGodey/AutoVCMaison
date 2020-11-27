@@ -3,6 +3,7 @@ import torch
 import torch.nn.functional as F
 import time
 import datetime
+import os
 
 
 class Solver(object):
@@ -41,6 +42,19 @@ class Solver(object):
         
         self.G.to(self.device)
         
+    
+    def save_model(self, path = 'autovc.ckpt'):
+        torch.save(self.G.state_dict(), path)
+        print("model state dict saved at ",path)
+
+
+    def load_model(self, path = 'autovc.ckpt'):
+        if os.path.exists(path):
+            print("Load weights from" + path + "for inference")
+            self.G.load_state_dict(torch.load(path))
+            self.G.eval()
+        else:
+            print("No checkpoint found, starting from scratch")
 
     def reset_grad(self):
         """Reset the gradient buffers."""
