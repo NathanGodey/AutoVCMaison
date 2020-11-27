@@ -18,7 +18,7 @@ parser.add_argument("--source")
 parser.add_argument("--target")
 parser.add_argument("--spmelFolder", default='./spmel')
 parser.add_argument("--wavsFolder", default='./wavs')
-parser.add_argument("--metadata", default='metadata.pkl')
+parser.add_argument("--metadata", default='spmel/train.pkl')
 parser.add_argument("--vocoder", default='checkpoint_step001000000_ema.pth')
 parser.add_argument("--outputFolder", default='results')
 args = parser.parse_args()
@@ -39,6 +39,8 @@ def get_embedding(metadata, speaker):
     for sbmt_i in metadata:
         if sbmt_i[0] == speaker:
             return torch.from_numpy(sbmt_i[1][np.newaxis, :]).to(device)
+    raise Exception(f'Embedding was not found for speaker {speaker}.')
+    #TODO : generate embedding from David's functions
 
 def get_uttr_melspect(uttr_wav_path):
     uttr_spmel_path = os.path.join(args.spmelFolder,uttr_wav_path[:-4]+'.npy')
