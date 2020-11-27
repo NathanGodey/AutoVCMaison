@@ -17,13 +17,13 @@ parser.add_argument("--model", default='autovc.ckpt')
 parser.add_argument("--source")
 parser.add_argument("--target")
 parser.add_argument("--spmelFolder", default='./spmel')
+parser.add_argument("--wavsFolder", default='./wavs')
 parser.add_argument("--metadata", default='metadata.pkl')
 parser.add_argument("--vocoder", default='checkpoint_step001000000_ema.pth')
 parser.add_argument("--outputFolder", default='results')
 args = parser.parse_args()
 
 source_person = args.source.split('/')[0]
-source_file = '__'.join(args.source.split('/')[1:])
 target_person = args.target.split('/')[0]
 
 if not os.path.isdir(args.outputFolder):
@@ -61,16 +61,26 @@ with torch.no_grad():
     emb_org = get_embedding(metadata, source_person)
     emb_trg = get_embedding(metadata, target_person)
 
-    x_org = get_uttr_melspect(args.source)
-    x_org, len_pad = pad_seq(x_org)
-    uttr_org = torch.from_numpy(x_org[np.newaxis, :, :]).to(device)
-
-    _, x_identic_psnt, _ = G(uttr_org, emb_org, emb_trg)
-    if len_pad == 0:
-        uttr_trg = x_identic_psnt[0, 0, :, :].cpu().numpy()
+    source_path = os.path.join(args.wavsFolder,args.source)
+    if os.path.isfile(source_path):
+        X_orgs = [args.source]
+    elif os.path.isdir(source_path):
+        X_orgs = [os.path.join(args.source,file) for _,_,files in os.walk(source_path) for file in files]
     else:
-        uttr_trg = x_identic_psnt[0, 0, :-len_pad, :].cpu().numpy()
-    spect_vc.append( ('{}_by_{}'.format(source_file[:-4], target_person), uttr_trg) )
+        raise Exception(f'Wrong path: {source_path}')
+
+    for x_org_source in X_orgs:
+        source_file = '__'.join(x_org_source.split('/')[1:])
+        x_org = get_uttr_melspect(x_org_source)
+        x_org, len_pad = pad_seq(x_org)
+        uttr_org = torch.from_numpy(x_org[np.newaxis, :, :]).to(device)
+
+        _, x_identic_psnt, _ = G(uttr_org, emb_org, emb_trg)
+        if len_pad == 0:
+            uttr_trg = x_identic_psnt[0, 0, :, :].cpu().numpy()
+        else:
+            uttr_trg = x_identic_psnt[0, 0, :-len_pad, :].cpu().numpy()
+        spect_vc.append( ('{}_by_{}'.format(source_file[:-4], target_person), uttr_trg) )
 
     del G
     del g_checkpoint
