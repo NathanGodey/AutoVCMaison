@@ -35,7 +35,7 @@ The audio demo for AUTOVC can be found [here](https://auspicious3000.github.io/a
 
 
 ### 0.Voice Conversion
-If you want to apply the style of indiviual p228 to the file ```p225/p225_003.wav```, run :
+If you want to apply the style of speaker p228 to the file ```p225/p225_003.wav```, run :
 
 ```python converter.py --source='p225/p225_003.wav' --target='p228'```
 
