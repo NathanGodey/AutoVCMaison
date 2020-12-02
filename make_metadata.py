@@ -59,6 +59,7 @@ def make_metadata(dataset_dir = 'training_set'):
 
         # create file list
         for fileName in sorted(fileList):
+            fileName = fileName.replace('\\', '/')
             utterances.append('/'.join(fileName.split('/')[-2:]))
         speakers.append(utterances)
 

@@ -59,6 +59,8 @@ def make_spec(datasetDir = "training_set"):
             if len(dirName.split('/')):
                 subfolder = dirName.split('/')[-1]
             for fileName in files:
+                if os.path.exists(os.path.join(targetDirName, subfolder+fileName[:-4]+'.npy')):
+                    continue
                 #prng = RandomState(int(subdir[1:]))
                 prng = RandomState(1)
                 # Read audio file
