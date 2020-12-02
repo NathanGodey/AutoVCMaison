@@ -139,6 +139,8 @@ class Solver(object):
                 code_reconst = self.G(x_identic_psnt, emb_org, None)
                 g_loss_cd = F.l1_loss(code_real, code_reconst)
 
+                del x_real, emb_org, x_identic, x_identic_psnt
+
 
                 # Backward and optimize.
                 g_loss = g_loss_id + g_loss_id_psnt + self.lambda_cd * g_loss_cd
