@@ -47,7 +47,6 @@ class Utterances(data.Dataset):
                     uttrs[j] = tmp
                 else: # load the mel-spectrograms
                     uttrs[j] = np.load(os.path.join(self.root_dir, tmp))
-                    print(tmp)
             dataset[idx_offset+k] = uttrs
 
 
