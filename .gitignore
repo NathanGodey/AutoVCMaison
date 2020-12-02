@@ -1,4 +1,3 @@
-*.wav
 *.pkl
 venv
 env
@@ -10,3 +9,4 @@ spmel
 *.ckpt
 __pycache__
 *.npy
+voxceleb
