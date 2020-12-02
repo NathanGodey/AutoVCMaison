@@ -68,9 +68,11 @@ class Solver(object):
     def load_trainable_model(self, path):
         if os.path.exists(self.init_model):
             try:
+                print(f'Loading model : {self.init_model}...')
                 checkpoint = torch.load(self.init_model)
                 self.G.load_state_dict(checkpoint['G_state_dict'])
                 self.g_optimizer.load_state_dict(checkpoint['g_optimizer_state_dict'])
+                del checkpoint
             except:
                 raise Exception(f'Could not load model at {self.init_model}.')
         else:
@@ -117,7 +119,7 @@ class Solver(object):
                     x_real, emb_org = next(data_iter)
 
                 x_real = x_real.to(self.device)
-                x_real_reshaped = x_real.reshape((x_real.shape[0],1,x_real.shape[1],x_real.shape[2]))
+
                 emb_org = emb_org.to(self.device)
 
 
@@ -129,9 +131,10 @@ class Solver(object):
 
                 # Identity mapping loss
                 x_identic, x_identic_psnt, code_real = self.G(x_real, emb_org, emb_org)
+                x_real_reshaped = x_real.reshape((x_real.shape[0],1,x_real.shape[1],x_real.shape[2]))
                 g_loss_id = F.mse_loss(x_real_reshaped, x_identic)
                 g_loss_id_psnt = F.mse_loss(x_real_reshaped, x_identic_psnt)
-
+                del x_real_reshaped
                 # Code semantic loss.
                 code_reconst = self.G(x_identic_psnt, emb_org, None)
                 g_loss_cd = F.l1_loss(code_real, code_reconst)
