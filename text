@@ -1,0 +1,1 @@
+py converter.py --source='p225/p225_003.wav' --target='p228' --spmelFolder='training_set\spmel' --metadata='training_set/spmel/train.pkl' --wavsFolder='training_set/wavs'

@@ -12,22 +12,6 @@ from synthesis import wavegen
 import soundfile as sf
 from torch_utils import device
 
-parser = argparse.ArgumentParser()
-parser.add_argument("--model", default='autovc.ckpt')
-parser.add_argument("--source")
-parser.add_argument("--target")
-parser.add_argument("--spmelFolder", default='./spmel')
-parser.add_argument("--wavsFolder", default='./wavs')
-parser.add_argument("--metadata", default='spmel/train.pkl')
-parser.add_argument("--vocoder", default='checkpoint_step001000000_ema.pth')
-parser.add_argument("--outputFolder", default='results')
-args = parser.parse_args()
-
-source_person = args.source.split('/')[0]
-target_person = args.target.split('/')[0]
-
-if not os.path.isdir(args.outputFolder):
-    os.mkdir(args.outputFolder)
 
 def pad_seq(x, base=32):
     len_out = int(base * ceil(float(x.shape[0])/base))
@@ -42,8 +26,8 @@ def get_embedding(metadata, speaker):
     raise Exception(f'Embedding was not found for speaker {speaker}.')
     #TODO : generate embedding from David's functions
 
-def get_uttr_melspect(uttr_wav_path):
-    uttr_spmel_path = os.path.join(args.spmelFolder,uttr_wav_path[:-4]+'.npy')
+def get_uttr_melspect(uttr_wav_path, spmelFolder):
+    uttr_spmel_path = os.path.join(spmelFolder,uttr_wav_path[:-4]+'.npy')
     mel_spect_exists = os.path.isfile(uttr_spmel_path)
     if mel_spect_exists:
         mlspect = np.load(uttr_spmel_path)
@@ -52,48 +36,70 @@ def get_uttr_melspect(uttr_wav_path):
         raise Exception(f'The spectogram for {uttr_wav_path} does not exist, auto-convert is not supported yet.')
     return mlspect
 
+def converter(model_ckpt, source, target, spmelFolder, wavsFolder, metadata_dir,
+ vocoder = 'checkpoint_step001000000_ema.pth', outputFolder ='results'):
+    if not os.path.isdir(outputFolder):
+        os.mkdir(outputFolder)
+    source_person = source.split('/')[0]
+    target_person = target.split('/')[0]
+    with torch.no_grad():
+        G = Generator(32,256,512,32).eval().to(device)
+        g_checkpoint = torch.load(model_ckpt, map_location=device)
+        G.load_state_dict(g_checkpoint['model'])
+        metadata = pickle.load(open(metadata_dir, "rb"))
+        spect_vc = []
 
-with torch.no_grad():
-    G = Generator(32,256,512,32).eval().to(device)
-    g_checkpoint = torch.load(args.model, map_location=device)
-    G.load_state_dict(g_checkpoint['model'])
-    metadata = pickle.load(open(args.metadata, "rb"))
-    spect_vc = []
+        emb_org = get_embedding(metadata, source_person)
+        emb_trg = get_embedding(metadata, target_person)
 
-    emb_org = get_embedding(metadata, source_person)
-    emb_trg = get_embedding(metadata, target_person)
-
-    source_path = os.path.join(args.wavsFolder,args.source)
-    if os.path.isfile(source_path):
-        X_orgs = [args.source]
-    elif os.path.isdir(source_path):
-        X_orgs = [os.path.join(args.source,file) for _,_,files in os.walk(source_path) for file in files]
-    else:
-        raise Exception(f'Wrong path: {source_path}')
-
-    for x_org_source in X_orgs:
-        source_file = '__'.join(x_org_source.split('/')[1:])
-        x_org = get_uttr_melspect(x_org_source)
-        x_org, len_pad = pad_seq(x_org)
-        uttr_org = torch.from_numpy(x_org[np.newaxis, :, :]).to(device)
-
-        _, x_identic_psnt, _ = G(uttr_org, emb_org, emb_trg)
-        if len_pad == 0:
-            uttr_trg = x_identic_psnt[0, 0, :, :].cpu().numpy()
+        source_path = os.path.join(wavsFolder,source)
+        if os.path.isfile(source_path):
+            X_orgs = [source]
+        elif os.path.isdir(source_path):
+            X_orgs = [os.path.join(source,file) for _,_,files in os.walk(source_path) for file in files]
         else:
-            uttr_trg = x_identic_psnt[0, 0, :-len_pad, :].cpu().numpy()
-        spect_vc.append( ('{}_by_{}'.format(source_file[:-4], target_person), uttr_trg) )
+            raise Exception(f'Wrong path: {source_path}')
 
-    del G
-    del g_checkpoint
+        for x_org_source in X_orgs:
+            source_file = '__'.join(x_org_source.split('/')[1:])
+            x_org = get_uttr_melspect(x_org_source, spmelFolder=spmelFolder)
+            x_org, len_pad = pad_seq(x_org)
+            uttr_org = torch.from_numpy(x_org[np.newaxis, :, :]).to(device)
 
-    model = build_model().to(device)
-    checkpoint = torch.load(args.vocoder)
-    model.load_state_dict(checkpoint["state_dict"])
+            _, x_identic_psnt, _ = G(uttr_org, emb_org, emb_trg)
+            if len_pad == 0:
+                uttr_trg = x_identic_psnt[0, 0, :, :].cpu().numpy()
+            else:
+                uttr_trg = x_identic_psnt[0, 0, :-len_pad, :].cpu().numpy()
+            spect_vc.append( ('{}_by_{}'.format(source_file[:-4], target_person), uttr_trg) )
 
-    for spect in spect_vc:
-        name = spect[0]
-        c = spect[1]
-        print(name)
-        waveform = wavegen(model, c=c)
-        sf.write(f'{args.outputFolder}/{name}.wav', waveform, 16000)
+        del G
+        del g_checkpoint
+
+        model = build_model().to(device)
+        checkpoint = torch.load(vocoder, map_location=torch.device(device))
+        model.load_state_dict(checkpoint["state_dict"])
+
+        for spect in spect_vc:
+            name = spect[0]
+            c = spect[1]
+            print(name)
+            waveform = wavegen(model, c=c)
+            sf.write(f'{outputFolder}/{name}.wav', waveform, 16000)
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--model", default='autovc.ckpt')
+    parser.add_argument("--source")
+    parser.add_argument("--target")
+    parser.add_argument("--spmelFolder", default='./spmel')
+    parser.add_argument("--wavsFolder", default='./wavs')
+    parser.add_argument("--metadata", default='spmel/train.pkl')
+    parser.add_argument("--vocoder", default='checkpoint_step001000000_ema.pth')
+    parser.add_argument("--outputFolder", default='results')
+
+    args = parser.parse_args() 
+
+    converter(model_ckpt= args.model, source=args.source, target=args.target,
+     spmelFolder=args.spmelFolder, wavsFolder= args.wavsFolder,
+      metadata_dir= args.metadata, vocoder=args.vocoder, outputFolder=args.outputFolder)

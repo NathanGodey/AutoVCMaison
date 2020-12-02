@@ -1,11 +1,14 @@
-*.pkl
+#env
 venv
 env
-.npy
 .vscode
 __pycache__
-spmel
+
+#checkpoints file
+*.pkl
 *.pth
 *.ckpt
-__pycache__
-*.npy
+
+#spmel
+.npy
+spmel
