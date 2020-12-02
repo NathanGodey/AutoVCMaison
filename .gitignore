@@ -9,3 +9,4 @@ spmel
 *.ckpt
 __pycache__
 *.npy
+results
