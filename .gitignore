@@ -12,3 +12,8 @@ __pycache__
 #spmel
 .npy
 spmel
+__pycache__
+*.npy
+
+
+results

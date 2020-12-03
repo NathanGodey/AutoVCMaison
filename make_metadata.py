@@ -40,7 +40,9 @@ def make_metadata(dataset_dir = 'training_set'):
             for fileName in files:
                 fileList.append(os.path.join(root,fileName))
         # make speaker embedding
-        assert len(fileList) >= num_uttrs
+        if len(fileList) < num_uttrs:
+            print(f'Could not process speaker {speaker} : not enough files were found ({len(fileList)})')
+            continue
         idx_uttrs = np.random.choice(len(fileList), size=num_uttrs, replace=False)
         embs = []
         for i in range(num_uttrs):
@@ -59,7 +61,8 @@ def make_metadata(dataset_dir = 'training_set'):
 
         # create file list
         for fileName in sorted(fileList):
-            utterances.append(os.path.join("\\".join(fileName.split('\\')[1:])))
+            fileName = fileName.replace('\\', '/')
+            utterances.append('/'.join(fileName.split('/')[-2:]))
         speakers.append(utterances)
 
     with open(os.path.join(rootDir, 'train.pkl'), 'wb') as handle:

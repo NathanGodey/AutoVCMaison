@@ -1,5 +1,6 @@
 from torch.utils import data
 import torch
+import tqdm
 import numpy as np
 import pickle
 import os
@@ -25,7 +26,8 @@ class Utterances(data.Dataset):
         meta = manager.list(meta)
         dataset = manager.list(len(meta)*[None])
         processes = []
-        for i in range(0, len(meta), self.step):
+        print('Loading data by batches...')
+        for i in tqdm.tqdm(range(0, len(meta), self.step)):
             p = Process(target=self.load_data,
                         args=(meta[i:i+self.step],dataset,i))
             p.start()
