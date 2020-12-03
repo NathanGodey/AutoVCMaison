@@ -22,6 +22,7 @@ class Solver(object):
         self.dim_pre = config.dim_pre
         self.freq = config.freq
         self.init_model = config.init_model
+        self.loss = []
 
         # Training configurations.
         self.batch_size = config.batch_size
@@ -81,7 +82,8 @@ class Solver(object):
     def save_trainable_model(self, path):
         torch.save({
             'G_state_dict': self.G.state_dict(),
-            'g_optimizer_state_dict': self.g_optimizer.state_dict()
+            'g_optimizer_state_dict': self.g_optimizer.state_dict(),
+            'G_loss': self.loss
             }, path)
 
 
@@ -144,6 +146,7 @@ class Solver(object):
 
                 # Backward and optimize.
                 g_loss = g_loss_id + g_loss_id_psnt + self.lambda_cd * g_loss_cd
+                self.loss.append(g_loss.item())
                 self.reset_grad()
                 g_loss.backward()
                 self.g_optimizer.step()
@@ -170,7 +173,7 @@ class Solver(object):
                 if self.saving_pace!=0 and (i+1) % self.saving_pace == 0:
                     if not os.path.exists('./trained_models'):
                         os.mkdir('trained_models')
-                    self.save_model(f'./trained_models/autovc_{self.saving_prefix}_{i+1}')
+                    self.save_trainable_model(f'./trained_models/autovc_{self.saving_prefix}_{i+1}')
         except KeyboardInterrupt:
             if self.autosave:
                 self.save_trainable_model('autovc_autosave.ckpt')
