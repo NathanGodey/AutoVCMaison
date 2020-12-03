@@ -40,12 +40,15 @@ def converter(model_ckpt, source, target, spmelFolder, wavsFolder, metadata_dir,
  vocoder = 'checkpoint_step001000000_ema.pth', outputFolder ='results'):
     if not os.path.isdir(outputFolder):
         os.mkdir(outputFolder)
+    source = source.replace('\\', '/')
+    target = target.replace('\\', '/')
     source_person = source.split('/')[0]
+    source_spmel_path =  os.path.join(source_person,''.join(source.split('/')[1:]))
     target_person = target.split('/')[0]
     with torch.no_grad():
-        G = Generator(32,256,512,32).eval().to(device)
+        G = Generator(16,256,512,16).eval().to(device)
         g_checkpoint = torch.load(model_ckpt, map_location=device)
-        G.load_state_dict(g_checkpoint['model'])
+        G.load_state_dict(g_checkpoint['G_state_dict'])
         metadata = pickle.load(open(metadata_dir, "rb"))
         spect_vc = []
 
@@ -54,13 +57,14 @@ def converter(model_ckpt, source, target, spmelFolder, wavsFolder, metadata_dir,
 
         source_path = os.path.join(wavsFolder,source)
         if os.path.isfile(source_path):
-            X_orgs = [source]
+            X_orgs = [source_spmel_path]
         elif os.path.isdir(source_path):
             X_orgs = [os.path.join(source,file) for _,_,files in os.walk(source_path) for file in files]
         else:
             raise Exception(f'Wrong path: {source_path}')
 
         for x_org_source in X_orgs:
+            x_org_source = x_org_source.replace('\\', '/')
             source_file = '__'.join(x_org_source.split('/')[1:])
             x_org = get_uttr_melspect(x_org_source, spmelFolder=spmelFolder)
             x_org, len_pad = pad_seq(x_org)
@@ -71,7 +75,7 @@ def converter(model_ckpt, source, target, spmelFolder, wavsFolder, metadata_dir,
                 uttr_trg = x_identic_psnt[0, 0, :, :].cpu().numpy()
             else:
                 uttr_trg = x_identic_psnt[0, 0, :-len_pad, :].cpu().numpy()
-            spect_vc.append( ('{}_by_{}'.format(source_file[:-4], target_person), uttr_trg) )
+            spect_vc.append( ('{}_{}_by_{}'.format(source_person,source_file[:-4], target_person), uttr_trg) )
 
         del G
         del g_checkpoint
@@ -83,7 +87,6 @@ def converter(model_ckpt, source, target, spmelFolder, wavsFolder, metadata_dir,
         for spect in spect_vc:
             name = spect[0]
             c = spect[1]
-            print(name)
             waveform = wavegen(model, c=c)
             sf.write(f'{outputFolder}/{name}.wav', waveform, 16000)
 

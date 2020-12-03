@@ -8,6 +8,7 @@ __pycache__
 *.pkl
 *.pth
 *.ckpt
+trained_models
 
 #spmel
 .npy
