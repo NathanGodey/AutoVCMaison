@@ -1,1 +1,0 @@
-py converter.py --source='id10002/0_laIeN-Q44/00001.wav' --target='id10001' --spmelFolder='voxceleb\spmel' --metadata='voxceleb/spmel/train.pkl' --wavsFolder='voxceleb/wavs'
