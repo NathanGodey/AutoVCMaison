@@ -1,12 +1,20 @@
-*.pkl
+#env
 venv
 env
-.npy
 .vscode
 __pycache__
-spmel
+
+#checkpoints file
+*.pkl
 *.pth
 *.ckpt
+trained_models
+
+#spmel
+.npy
+spmel
 __pycache__
 *.npy
+
+
 results
