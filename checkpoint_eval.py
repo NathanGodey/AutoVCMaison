@@ -26,4 +26,9 @@ def checkpoint_eval(dataset,
         converter(os.path.join(checkpoints_dir,checkpoint), source, target, spmelFolder, wavsFolder, os.path.join(spmelFolder,'train.pkl'), outputFolder=os.path.join(checkpoints_dir,checkpoint[-1]))
     return
 
-checkpoint_eval('voxceleb')
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--dataset', type=str, default="voxceleb", help='dataset dir')
+    args = parser.parse_args() 
+
+    checkpoint_eval(args.dataset)
