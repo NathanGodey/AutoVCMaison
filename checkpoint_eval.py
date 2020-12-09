@@ -21,9 +21,9 @@ def checkpoint_eval(dataset,
     _, _, files = next(os.walk(checkpoints_dir))
     for checkpoint in files:
         if not os.path.exists(os.path.join(checkpoints_dir,checkpoint[-1])):
-            os.makedirs(os.path.join(checkpoints_dir,checkpoint[-1]))
+            os.makedirs(os.path.join(checkpoints_dir,checkpoint+'_sound'))
         print('Found checkpoint: ',checkpoint)
-        converter(os.path.join(checkpoints_dir,checkpoint), source, target, spmelFolder, wavsFolder, os.path.join(spmelFolder,'train.pkl'), outputFolder=os.path.join(checkpoints_dir,checkpoint[-1]))
+        converter(os.path.join(checkpoints_dir,checkpoint), source, target, spmelFolder, wavsFolder, os.path.join(spmelFolder,'train.pkl'), outputFolder=os.path.join(checkpoints_dir,checkpoint+'_sound'))
     return
 
 if __name__ == '__main__':
