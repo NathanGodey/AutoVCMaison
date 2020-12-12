@@ -27,12 +27,12 @@ class Utterances(data.Dataset):
         dataset = manager.list(len(meta)*[None])
         processes = []
         print('Loading data by batches...')
-        for i in tqdm.tqdm(range(0, len(meta), self.step)):
+        for i in range(0, len(meta), self.step):
             p = Process(target=self.load_data,
                         args=(meta[i:i+self.step],dataset,i))
             p.start()
             processes.append(p)
-        for p in processes:
+        for p in tqdm.tqdm(processes):
             p.join()
 
         self.train_dataset = list(dataset)
