@@ -48,15 +48,22 @@ def get_uttr_melspect(uttr_wav_path):
     if mel_spect_exists:
         mlspect = np.load(uttr_spmel_path)
     else:
-        #TODO : implement auto-convert
-        raise Exception(f'The spectogram for {uttr_wav_path} does not exist, auto-convert is not supported yet.')
+        alter_suffix = os.path.join(uttr_spmel_path.split('/')[-3], ''.join(uttr_spmel_path.split('/')[-2:]))
+        alter_uttr_spmel_path = os.path.join(args.spmelFolder,alter_suffix)
+        if os.path.isfile(alter_uttr_spmel_path):
+            return get_uttr_melspect(alter_suffix)
+        else:
+            #TODO : implement auto-convert
+            raise Exception(f'The spectogram for {uttr_wav_path} does not exist, auto-convert is not supported yet.')
     return mlspect
 
 
 with torch.no_grad():
-    G = Generator(32,256,512,32).eval().to(device)
     g_checkpoint = torch.load(args.model, map_location=device)
-    G.load_state_dict(g_checkpoint['model'])
+    hparams = g_checkpoint['hyperparams']
+    G = Generator(hparams['dim_neck'],hparams['dim_emb'],hparams['dim_pre'],hparams['freq']).eval().to(device)
+    
+    G.load_state_dict(g_checkpoint['G_state_dict'])
     metadata = pickle.load(open(args.metadata, "rb"))
     spect_vc = []
 

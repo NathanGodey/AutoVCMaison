@@ -10,3 +10,4 @@ spmel
 __pycache__
 *.npy
 results
+trained_models

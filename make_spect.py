@@ -82,22 +82,6 @@ def make_spec(datasetDir = "training_set"):
                     continue
                 #prng = RandomState(int(subdir[1:]))
                 to_spec(os.path.join(dirName,fileName), os.path.join(targetDirName, subfolder+fileName[:-4]))
-                prng = RandomState(1)
-                # Read audio file
-                x, fs = sf.read(os.path.join(dirName,fileName))
-                # Remove drifting noise
-                y = signal.filtfilt(b, a, x)
-                # Ddd a little random noise for model roubstness
-                wav = y * 0.96 + (prng.rand(y.shape[0])-0.5)*1e-06
-                # Compute spect
-                D = pySTFT(wav).T
-                # Convert to mel and normalize
-                D_mel = np.dot(D, mel_basis)
-                D_db = 20 * np.log10(np.maximum(min_level, D_mel)) - 16
-                S = np.clip((D_db + 100) / 100, 0, 1)
-                # save spect
-                np.save(os.path.join(targetDirName, subfolder+fileName[:-4]),
-                        S.astype(np.float32), allow_pickle=False)
 
 
 if __name__ == '__main__':

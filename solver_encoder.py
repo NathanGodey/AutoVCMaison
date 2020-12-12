@@ -54,7 +54,10 @@ class Solver(object):
 
 
     def save_model(self, path = 'autovc.ckpt'):
-        torch.save(self.G.state_dict(), path)
+        torch.save({
+            'G_state_dict': self.G.state_dict(),
+            'hyperparams':{'dim_neck': self.dim_neck, 'dim_emb': self.dim_emb, 'dim_pre': self.dim_pre, 'freq': self.freq}
+            }, path)
         print("model state dict saved at ",path)
 
 
@@ -73,6 +76,7 @@ class Solver(object):
                 checkpoint = torch.load(self.init_model)
                 self.G.load_state_dict(checkpoint['G_state_dict'])
                 self.g_optimizer.load_state_dict(checkpoint['g_optimizer_state_dict'])
+                self.loss = checkpoint["loss"]
                 del checkpoint
             except:
                 raise Exception(f'Could not load model at {self.init_model}.')
@@ -81,6 +85,7 @@ class Solver(object):
 
     def save_trainable_model(self, path):
         torch.save({
+            'hyperparams':{'dim_neck': self.dim_neck, 'dim_emb': self.dim_emb, 'dim_pre': self.dim_pre, 'freq': self.freq},
             'G_state_dict': self.G.state_dict(),
             'g_optimizer_state_dict': self.g_optimizer.state_dict(),
             'G_loss': self.loss
@@ -153,6 +158,7 @@ class Solver(object):
 
                 # Logging.
                 loss = {}
+                loss['G/loss'] = g_loss.item()
                 loss['G/loss_id'] = g_loss_id.item()
                 loss['G/loss_id_psnt'] = g_loss_id_psnt.item()
                 loss['G/loss_cd'] = g_loss_cd.item()
