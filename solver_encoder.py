@@ -68,7 +68,7 @@ class Solver(object):
             self.G.eval()
         else:
             print("No checkpoint found, starting from scratch")
-    
+
 
 
     def load_trainable_model(self, path):
@@ -106,7 +106,7 @@ class Solver(object):
         data_loader = self.vcc_loader
 
         # Print logs in specified order
-        keys = ['G/loss_id','G/loss_id_psnt','G/loss_cd']
+        keys = ['G/loss', 'G/loss_id','G/loss_id_psnt','G/loss_cd']
 
         # Start training.
         print('Start training...')
