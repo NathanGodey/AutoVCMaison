@@ -52,13 +52,19 @@ def converter(model_ckpt, source, target, spmelFolder, wavsFolder, metadata_dir,
     target_person = target.split('/')[0]
     with torch.no_grad():
         g_checkpoint = torch.load(args.model, map_location=device)
-        hparams = g_checkpoint['hyperparams']
+        default_hparams = {
+            'dim_neck': 32,
+            'dim_emb': 256,
+            'dim_pre': 512,
+            'freq': 32
+        }
+        hparams = g_checkpoint.get('hyperparams', default_hparams)
         G = Generator(hparams['dim_neck'],hparams['dim_emb'],hparams['dim_pre'],hparams['freq']).eval().to(device)
 
-        G.load_state_dict(g_checkpoint['G_state_dict'])
-        metadata = pickle.load(open(args.metadata, "rb"))
+        G.load_state_dict(g_checkpoint.get('G_state_dict', g_checkpoint.get('model')))
+        metadata = pickle.load(open(os.path.join(args.spmelFolder, args.metadata), "rb"))
         spect_vc = []
-        
+
         emb_org = get_embedding(metadata, source_person)
         emb_trg = get_embedding(metadata, target_person)
 
@@ -102,13 +108,13 @@ if __name__ == '__main__':
     parser.add_argument("--model", default='autovc.ckpt')
     parser.add_argument("--source")
     parser.add_argument("--target")
-    parser.add_argument("--spmelFolder", default='./spmel')
-    parser.add_argument("--wavsFolder", default='./wavs')
-    parser.add_argument("--metadata", default='spmel/train.pkl')
+    parser.add_argument("--spmelFolder", default='./training_set/spmel')
+    parser.add_argument("--wavsFolder", default='./training_set/wavs')
+    parser.add_argument("--metadata", default='train.pkl')
     parser.add_argument("--vocoder", default='checkpoint_step001000000_ema.pth')
     parser.add_argument("--outputFolder", default='results')
 
-    args = parser.parse_args() 
+    args = parser.parse_args()
 
     converter(model_ckpt= args.model, source=args.source, target=args.target,
      spmelFolder=args.spmelFolder, wavsFolder= args.wavsFolder,
