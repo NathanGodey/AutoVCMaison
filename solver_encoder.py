@@ -68,6 +68,8 @@ class Solver(object):
             self.G.eval()
         else:
             print("No checkpoint found, starting from scratch")
+    
+
 
     def load_trainable_model(self, path):
         if os.path.exists(self.init_model):
@@ -98,8 +100,6 @@ class Solver(object):
 
 
     #=====================================================================================================================================#
-
-
 
     def train(self):
         # Set data loader.

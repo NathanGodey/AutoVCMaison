@@ -33,12 +33,12 @@ def pySTFT(x, fft_length=1024, hop_length=256):
     return np.abs(result)
 
 
-def to_spec(wav_path, target_path):
+def to_spec(wav_path, target_path,a, b, mel_basis, min_level):
     prng = RandomState(1)
     # Read audio file
-    x, fs = sf.read(wav_path)
+    x, fs = sf.read(wav_path, always_2d=True)
     # Remove drifting noise
-    y = signal.filtfilt(b, a, x)
+    y = signal.filtfilt(b, a, x[:,0])
     # Ddd a little random noise for model roubstness
     wav = y * 0.96 + (prng.rand(y.shape[0])-0.5)*1e-06
     # Compute spect
@@ -81,13 +81,13 @@ def make_spec(datasetDir = "training_set"):
                 if os.path.exists(os.path.join(targetDirName, subfolder+fileName[:-4]+'.npy')):
                     continue
                 #prng = RandomState(int(subdir[1:]))
-                to_spec(os.path.join(dirName,fileName), os.path.join(targetDirName, subfolder+fileName[:-4]))
+                to_spec(os.path.join(dirName,fileName), os.path.join(targetDirName, subfolder+fileName[:-4]),a, b, mel_basis, min_level)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     # dataset dir
-    parser.add_argument('--dataset', type=str, default="training_set", help='dataset dir')
+    parser.add_argument('--dataset', type=str, default="voxceleb", help='dataset dir')
     config = parser.parse_args()
     make_spec(config.dataset)

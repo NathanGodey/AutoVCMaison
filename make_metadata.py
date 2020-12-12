@@ -73,6 +73,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     # dataset dir
-    parser.add_argument('--dataset', type=str, default="training_set", help='dataset dir')
+    parser.add_argument('--dataset', type=str, default="voxceleb", help='dataset dir')
     config = parser.parse_args()
     make_metadata(config.dataset)

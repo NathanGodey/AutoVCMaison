@@ -3,7 +3,7 @@ import argparse
 from solver_encoder import Solver
 from data_loader import get_loader
 from torch.backends import cudnn
-
+from torch_utils import device
 
 def str2bool(v):
     return v.lower() in ('true')
@@ -47,7 +47,7 @@ if __name__ == '__main__':
     parser.add_argument('--batch_size', type=int, default=2, help='mini-batch size')
     parser.add_argument('--num_iters', type=int, default=10, help='number of total iterations')
     parser.add_argument('--len_crop', type=int, default=128, help='dataloader output sequence length')
-
+    print('use device: ', device)
     # Miscellaneous.
     parser.add_argument('--log_step', type=int, default=10)
 
