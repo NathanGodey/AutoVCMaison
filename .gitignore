@@ -20,3 +20,5 @@ __pycache__
 results
 trained_models
 voxceleb_full
+
+*.wav

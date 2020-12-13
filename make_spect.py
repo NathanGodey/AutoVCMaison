@@ -40,6 +40,8 @@ def to_spec(wav_path, target_path,a, b, mel_basis, min_level):
     x, fs = load(wav_path, mono=True, sr=16000)
     # Remove drifting noise
     y = signal.filtfilt(b, a, x)
+
+    sf.write(f'post_filtering.wav', y, samplerate=16000)
     # Ddd a little random noise for model roubstness
     wav = y * 0.96 + (prng.rand(y.shape[0])-0.5)*1e-06
     # Compute spect
