@@ -101,7 +101,7 @@ def converter(model_ckpt, source, target, spmelFolder, wavsFolder, metadata_dir,
             name = spect[0]
             c = spect[1]
             waveform = wavegen(model, c=c)
-            sf.write(f'{outputFolder}/{name}.wav', waveform, 16000)
+            sf.write(f'{outputFolder}/{name}.wav', waveform, samplerate=16000)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

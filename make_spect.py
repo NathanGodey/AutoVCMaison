@@ -5,6 +5,7 @@ import soundfile as sf
 from scipy import signal
 from scipy.signal import get_window
 from librosa.filters import mel
+from librosa.core import load
 from numpy.random import RandomState
 import argparse
 import tqdm
@@ -36,9 +37,9 @@ def pySTFT(x, fft_length=1024, hop_length=256):
 def to_spec(wav_path, target_path,a, b, mel_basis, min_level):
     prng = RandomState(1)
     # Read audio file
-    x, fs = sf.read(wav_path, always_2d=True)
+    x, fs = load(wav_path, mono=True, sr=16000)
     # Remove drifting noise
-    y = signal.filtfilt(b, a, x[:,0])
+    y = signal.filtfilt(b, a, x)
     # Ddd a little random noise for model roubstness
     wav = y * 0.96 + (prng.rand(y.shape[0])-0.5)*1e-06
     # Compute spect
