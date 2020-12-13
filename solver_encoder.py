@@ -22,6 +22,7 @@ class Solver(object):
         self.dim_pre = config.dim_pre
         self.freq = config.freq
         self.init_model = config.init_model
+        self.init_iter = 0
         self.loss = []
 
         # Training configurations.
@@ -78,7 +79,8 @@ class Solver(object):
                 checkpoint = torch.load(self.init_model)
                 self.G.load_state_dict(checkpoint['G_state_dict'])
                 self.g_optimizer.load_state_dict(checkpoint['g_optimizer_state_dict'])
-                self.loss = checkpoint["loss"]
+                self.loss = checkpoint["G_loss"]
+                self.init_iter = len(self.loss)
                 del checkpoint
             except:
                 raise Exception(f'Could not load model at {self.init_model}.')
@@ -112,7 +114,7 @@ class Solver(object):
         print('Start training...')
         try:
             start_time = time.time()
-            for i in range(self.num_iters):
+            for i in range(self.init_iter, self.init_iter + self.num_iters):
 
                 # =================================================================================== #
                 #                             1. Preprocess input data                                #
