@@ -74,7 +74,7 @@ def make_metadata(dataset_dir = 'training_set'):
                 utterances.extend(speaker[2:])
                 dataset.append(utterances)
 
-    with open(os.path.join(rootDir, 'train_2.pkl'), 'wb') as handle:
+    with open(os.path.join(rootDir, 'train_circular.pkl'), 'wb') as handle:
         pickle.dump(dataset, handle)
 
 
