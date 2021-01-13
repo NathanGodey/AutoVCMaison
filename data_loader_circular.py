@@ -18,7 +18,7 @@ class Utterances(data.Dataset):
         self.len_crop = len_crop
         self.step = 10
 
-        metaname = os.path.join(self.root_dir, "train.pkl")
+        metaname = os.path.join(self.root_dir, "train_2.pkl")
         meta = pickle.load(open(metaname, "rb"))
 
         """Load data using multiprocessing"""
