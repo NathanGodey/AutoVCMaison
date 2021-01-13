@@ -1,7 +1,7 @@
 import os
 import argparse
-from solver_encoder_2 import Solver
-from data_loader_2 import get_loader
+from solver_encoder_circular import Solver
+from data_loader_circular import get_loader
 from torch.backends import cudnn
 from torch_utils import device
 
