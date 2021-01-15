@@ -4,6 +4,7 @@ import torch.nn.functional as F
 import time
 import datetime
 import os
+from make_metadata_circular import load_speaker_embedding_model
 
 from torch_utils import device
 
@@ -24,6 +25,7 @@ class Solver(object):
         self.init_model = config.init_model
         self.init_iter = 0
         self.loss = []
+        self.speaker_embedder = load_speaker_embedding_model()
 
         # Training configurations.
         self.batch_size = config.batch_size
@@ -131,6 +133,8 @@ class Solver(object):
 
                 emb_org = emb_org.to(self.device)
 
+                emb_target = emb_target.to(self.device)
+
 
                 # =================================================================================== #
                 #                               2. Train the generator                                #
@@ -138,21 +142,26 @@ class Solver(object):
 
                 self.G = self.G.train()
 
-                # Identity mapping loss
-                x_identic, x_identic_psnt, code_real = self.G(x_real, emb_org, emb_org)
+                # Circular mapping loss
+                x_target_pred, x_target_pred_psnt, code_org = self.G(x_real, emb_org, emb_target)
+                x_org_reconst, x_org_reconst_psnt, code_target_pred = self.G(x_target_pred.reshape(x_real.shape), emb_target, emb_org)
                 x_real_reshaped = x_real.reshape((x_real.shape[0],1,x_real.shape[1],x_real.shape[2]))
-                g_loss_id = F.mse_loss(x_real_reshaped, x_identic)
-                g_loss_id_psnt = F.mse_loss(x_real_reshaped, x_identic_psnt)
+                g_loss_id = F.mse_loss(x_real_reshaped, x_org_reconst)
+                g_loss_id_psnt = F.mse_loss(x_real_reshaped, x_org_reconst_psnt)
                 del x_real_reshaped
-                # Code semantic loss.
-                code_reconst = self.G(x_identic_psnt, emb_org, None)
-                g_loss_cd = F.l1_loss(code_real, code_reconst)
 
-                del x_real, emb_org, x_identic, x_identic_psnt
+                # Code semantic loss.
+                g_loss_cd = F.l1_loss(code_org, code_target_pred)
+
+                # Output style domain loss
+                emb_target_pred = self.speaker_embedder(x_target_pred_psnt.reshape(x_real.shape)).to(self.device)
+                g_loss_target_style = F.l1_loss(emb_target_pred, emb_target)
+
+                # del x_real, emb_org, x_identic, x_identic_psnt
 
 
                 # Backward and optimize.
-                g_loss = g_loss_id + g_loss_id_psnt + self.lambda_cd * g_loss_cd
+                g_loss = g_loss_id + g_loss_id_psnt + g_loss_target_style + self.lambda_cd * g_loss_cd
                 self.loss.append(g_loss.item())
                 self.reset_grad()
                 g_loss.backward()
