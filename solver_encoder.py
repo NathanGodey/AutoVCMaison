@@ -22,6 +22,7 @@ class Solver(object):
         self.dim_pre = config.dim_pre
         self.freq = config.freq
         self.init_model = config.init_model
+        self.learning_rate = config.learning_rate
         self.init_iter = 0
         self.loss = []
 
@@ -49,7 +50,7 @@ class Solver(object):
 
         self.G = Generator(self.dim_neck, self.dim_emb, self.dim_pre, self.freq)
 
-        self.g_optimizer = torch.optim.Adam(self.G.parameters(), 0.0001)
+        self.g_optimizer = torch.optim.Adam(self.G.parameters(), self.learning_rate)
 
         self.G.to(self.device)
 

@@ -50,6 +50,7 @@ if __name__ == '__main__':
     print('use device: ', device)
     # Miscellaneous.
     parser.add_argument('--log_step', type=int, default=100)
+    parser.add_argument('--learning_rate', type=float, default=0.0001)
 
     config = parser.parse_args()
     print(config)
