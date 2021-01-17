@@ -33,7 +33,7 @@ if __name__ == '__main__':
     parser.add_argument('--dim_pre', type=int, default=512)
     parser.add_argument('--freq', type=int, default=16)
     parser.add_argument('--init_model', type=str, default='')
-    parser.add_argument('--use_speaker_loss', type=bool, default=True)
+    parser.add_argument('--use_speaker_loss', type=int, default=1)
 
     # Checkpoint path
     parser.add_argument('--checkpoint', type=str, default='autovc.ckpt')
