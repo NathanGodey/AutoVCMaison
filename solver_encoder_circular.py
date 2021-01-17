@@ -10,12 +10,12 @@ from torch_utils import device
 
 class Solver(object):
 
-    def __init__(self, vcc_loader, config):
+    def __init__(self, vcc_loader, config, use_speaker_loss = True):
         """Initialize configurations."""
 
         # Data loader.
         self.vcc_loader = vcc_loader
-
+        self.use_speaker_loss = use_speaker_loss
         # Model configurations.
         self.lambda_cd = config.lambda_cd
         self.dim_neck = config.dim_neck
@@ -154,14 +154,18 @@ class Solver(object):
                 g_loss_cd = F.l1_loss(code_org, code_target_pred)
 
                 # Output style domain loss
-                emb_target_pred = self.speaker_embedder(x_target_pred_psnt.reshape(x_real.shape)).to(self.device)
-                g_loss_target_style = F.l1_loss(emb_target_pred, emb_target)
+                if self.use_speaker_loss:
+                    emb_target_pred = self.speaker_embedder(x_target_pred_psnt.reshape(x_real.shape)).to(self.device)
+                    g_loss_target_style = F.l1_loss(emb_target_pred, emb_target)
 
                 # del x_real, emb_org, x_identic, x_identic_psnt
 
 
                 # Backward and optimize.
-                g_loss = g_loss_id + g_loss_id_psnt + g_loss_target_style + self.lambda_cd * g_loss_cd
+                if self.use_speaker_loss:
+                    g_loss = g_loss_id + g_loss_id_psnt + g_loss_target_style + self.lambda_cd * g_loss_cd
+                else:
+                    g_loss = g_loss_id + g_loss_id_psnt + self.lambda_cd * g_loss_cd
                 self.loss.append(g_loss.item())
                 self.reset_grad()
                 g_loss.backward()

@@ -15,7 +15,7 @@ def main(config):
     # Data loader.
     vcc_loader = get_loader(config.dataset + '/spmel', config.batch_size, config.len_crop)
 
-    solver = Solver(vcc_loader, config)
+    solver = Solver(vcc_loader, config, use_speaker_loss=config.use_speaker_loss)
 
     solver.train()
     solver.save_model(config.dataset + '/' + config.checkpoint)
@@ -33,6 +33,7 @@ if __name__ == '__main__':
     parser.add_argument('--dim_pre', type=int, default=512)
     parser.add_argument('--freq', type=int, default=16)
     parser.add_argument('--init_model', type=str, default='')
+    parser.add_argument('--use_speaker_loss', type=bool, default=True)
 
     # Checkpoint path
     parser.add_argument('--checkpoint', type=str, default='autovc.ckpt')
