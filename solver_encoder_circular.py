@@ -4,18 +4,18 @@ import torch.nn.functional as F
 import time
 import datetime
 import os
-from make_metadata_circular import load_speaker_embedding_model
+from make_metadata import load_speaker_embedding_model
 
 from torch_utils import device
 
 class Solver(object):
 
-    def __init__(self, vcc_loader, config, use_speaker_loss = 1):
+    def __init__(self, vcc_loader, config):
         """Initialize configurations."""
 
         # Data loader.
         self.vcc_loader = vcc_loader
-        self.use_speaker_loss = use_speaker_loss
+
         # Model configurations.
         self.lambda_cd = config.lambda_cd
         self.dim_neck = config.dim_neck
@@ -26,6 +26,7 @@ class Solver(object):
         self.init_iter = 0
         self.loss = []
         self.speaker_embedder = load_speaker_embedding_model()
+
         # Training configurations.
         self.batch_size = config.batch_size
         self.num_iters = config.num_iters
@@ -153,18 +154,14 @@ class Solver(object):
                 g_loss_cd = F.l1_loss(code_org, code_target_pred)
 
                 # Output style domain loss
-                if self.use_speaker_loss == 1:
-                    emb_target_pred = self.speaker_embedder(x_target_pred_psnt.reshape(x_real.shape)).to(self.device)
-                    g_loss_target_style = F.l1_loss(emb_target_pred, emb_target)
+                emb_target_pred = self.speaker_embedder(x_target_pred_psnt.reshape(x_real.shape)).to(self.device)
+                g_loss_target_style = F.l1_loss(emb_target_pred, emb_target)
 
                 # del x_real, emb_org, x_identic, x_identic_psnt
 
 
                 # Backward and optimize.
-                if self.use_speaker_loss == 1:
-                    g_loss = g_loss_id + g_loss_id_psnt + g_loss_target_style + self.lambda_cd * g_loss_cd
-                else:
-                    g_loss = g_loss_id + g_loss_id_psnt + self.lambda_cd * g_loss_cd
+                g_loss = g_loss_id + g_loss_id_psnt + g_loss_target_style + self.lambda_cd * g_loss_cd
                 self.loss.append(g_loss.item())
                 self.reset_grad()
                 g_loss.backward()
