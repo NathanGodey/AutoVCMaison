@@ -22,7 +22,6 @@ class Solver(object):
         self.dim_pre = config.dim_pre
         self.freq = config.freq
         self.init_model = config.init_model
-        self.learning_rate = config.learning_rate
         self.init_iter = 0
         self.loss = []
 
@@ -32,6 +31,7 @@ class Solver(object):
         self.autosave = config.checkpoint_mode=='autosave'
         self.saving_pace = config.save_every_n_iter
         self.saving_prefix = config.save_path
+        self.learning_rate = config.learning_rate
 
         # Miscellaneous.
         self.device = device
