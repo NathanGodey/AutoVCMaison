@@ -15,7 +15,7 @@ def main(config):
     # Data loader.
     vcc_loader = get_loader(config.dataset + '/spmel', config.batch_size, config.len_crop)
 
-    solver = Solver(vcc_loader, config, use_speaker_loss=config.use_speaker_loss)
+    solver = Solver(vcc_loader, config)
 
     solver.train()
     solver.save_model(config.dataset + '/' + config.checkpoint)

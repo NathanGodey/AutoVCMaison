@@ -34,6 +34,7 @@ class Solver(object):
         self.saving_pace = config.save_every_n_iter
         self.saving_prefix = config.save_path
         self.learning_rate = config.learning_rate
+        self.use_speaker_loss = config.use_speaker_loss
 
         # Miscellaneous.
         self.device = device
@@ -117,6 +118,7 @@ class Solver(object):
         print('Start training...')
         try:
             start_time = time.time()
+            g_loss_target_style = torch.Tensor([0]).to(self.device)
             for i in range(self.init_iter, self.init_iter + self.num_iters):
 
                 # =================================================================================== #
@@ -155,8 +157,9 @@ class Solver(object):
                 g_loss_cd = F.l1_loss(code_org, code_target_pred)
 
                 # Output style domain loss
-                emb_target_pred = self.speaker_embedder(x_target_pred_psnt.reshape(x_real.shape)).to(self.device)
-                g_loss_target_style = F.l1_loss(emb_target_pred, emb_target)
+                if self.use_speaker_loss:
+                    emb_target_pred = self.speaker_embedder(x_target_pred_psnt.reshape(x_real.shape)).to(self.device)
+                    g_loss_target_style = F.l1_loss(emb_target_pred, emb_target)
 
                 # del x_real, emb_org, x_identic, x_identic_psnt
 
@@ -174,6 +177,8 @@ class Solver(object):
                 loss['G/loss_id'] = g_loss_id.item()
                 loss['G/loss_id_psnt'] = g_loss_id_psnt.item()
                 loss['G/loss_cd'] = g_loss_cd.item()
+                if self.use_speaker_loss:
+                    loss['G/loss_tgt_style'] = g_loss_target_style.item()
 
                 # =================================================================================== #
                 #                                 4. Miscellaneous                                    #
