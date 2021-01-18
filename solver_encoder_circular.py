@@ -177,7 +177,7 @@ class Solver(object):
                 loss['G/loss_id'] = g_loss_id.item() + loss.get('G/loss_id', 0)
                 loss['G/loss_id_psnt'] = g_loss_id_psnt.item() + loss.get('G/loss_id_psnt', 0)
                 loss['G/loss_cd'] = g_loss_cd.item() + loss.get('G/loss_cd', 0)
-                if self.use_speaker_loss:
+                if self.use_speaker_loss == 1:
                     loss['G/loss_tgt_style'] = g_loss_target_style.item() + loss.get('G/loss_tgt_style', 0)
 
                 # =================================================================================== #
