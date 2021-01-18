@@ -27,7 +27,7 @@ def load_speaker_embedding_model():
 def make_metadata(dataset_dir = 'training_set'):
 
     C=load_speaker_embedding_model().eval()
-    num_uttrs = 5
+    
     # Directory containing mel-spectrograms
     rootDir = dataset_dir + '/spmel'
     dirName, subdirList, _ = next(os.walk(rootDir))
