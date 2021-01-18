@@ -38,7 +38,7 @@ class Utterances(data.Dataset):
         self.train_dataset = list(dataset)
         self.num_tokens = len(self.train_dataset)
 
-        print('Finished loading the dataset...')
+        print(f'Finished loading the dataset...')
 
 
     def load_data(self, submeta, dataset, idx_offset):
@@ -75,8 +75,8 @@ class Utterances(data.Dataset):
         return uttr, emb_org, emb_trgt
 
     def __len__(self):
-        """Return the number of spkrs."""
-        return self.num_tokens
+        """Return the number of spkrs combinations."""
+        return (self.num_tokens * (self.num_tokens - 1))
 
 
 
