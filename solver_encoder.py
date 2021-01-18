@@ -31,6 +31,7 @@ class Solver(object):
         self.autosave = config.checkpoint_mode=='autosave'
         self.saving_pace = config.save_every_n_iter
         self.saving_prefix = config.save_path
+        self.learning_rate = config.learning_rate
 
         # Miscellaneous.
         self.device = device
@@ -49,7 +50,7 @@ class Solver(object):
 
         self.G = Generator(self.dim_neck, self.dim_emb, self.dim_pre, self.freq)
 
-        self.g_optimizer = torch.optim.Adam(self.G.parameters(), 0.0001)
+        self.g_optimizer = torch.optim.Adam(self.G.parameters(), self.learning_rate)
 
         self.G.to(self.device)
 

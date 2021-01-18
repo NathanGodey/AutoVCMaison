@@ -4,18 +4,18 @@ import torch.nn.functional as F
 import time
 import datetime
 import os
-from make_metadata_circular import load_speaker_embedding_model
+from make_metadata import load_speaker_embedding_model
 
 from torch_utils import device
 
 class Solver(object):
 
-    def __init__(self, vcc_loader, config, use_speaker_loss = 1):
+    def __init__(self, vcc_loader, config):
         """Initialize configurations."""
 
         # Data loader.
         self.vcc_loader = vcc_loader
-        self.use_speaker_loss = use_speaker_loss
+
         # Model configurations.
         self.lambda_cd = config.lambda_cd
         self.dim_neck = config.dim_neck
@@ -26,12 +26,15 @@ class Solver(object):
         self.init_iter = 0
         self.loss = []
         self.speaker_embedder = load_speaker_embedding_model()
+
         # Training configurations.
         self.batch_size = config.batch_size
         self.num_iters = config.num_iters
         self.autosave = config.checkpoint_mode=='autosave'
         self.saving_pace = config.save_every_n_iter
         self.saving_prefix = config.save_path
+        self.learning_rate = config.learning_rate
+        self.use_speaker_loss = config.use_speaker_loss
 
         # Miscellaneous.
         self.device = device
@@ -50,7 +53,7 @@ class Solver(object):
 
         self.G = Generator(self.dim_neck, self.dim_emb, self.dim_pre, self.freq)
 
-        self.g_optimizer = torch.optim.Adam(self.G.parameters(), 0.0001)
+        self.g_optimizer = torch.optim.Adam(self.G.parameters(), self.learning_rate)
 
         self.G.to(self.device)
 
@@ -155,7 +158,7 @@ class Solver(object):
                 g_loss_cd = F.l1_loss(code_org, code_target_pred)
 
                 # Output style domain loss
-                if self.use_speaker_loss == 1:
+                if self.use_speaker_loss:
                     emb_target_pred = self.speaker_embedder(x_target_pred_psnt.reshape(x_real.shape)).to(self.device)
                     g_loss_target_style = F.l1_loss(emb_target_pred, emb_target)
 
@@ -163,10 +166,7 @@ class Solver(object):
 
 
                 # Backward and optimize.
-                if self.use_speaker_loss == 1:
-                    g_loss = g_loss_id + g_loss_id_psnt + g_loss_target_style + self.lambda_cd * g_loss_cd
-                else:
-                    g_loss = g_loss_id + g_loss_id_psnt + self.lambda_cd * g_loss_cd
+                g_loss = g_loss_id + g_loss_id_psnt + g_loss_target_style + self.lambda_cd * g_loss_cd
                 self.loss.append(g_loss.item())
                 self.reset_grad()
                 g_loss.backward()

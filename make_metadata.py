@@ -10,8 +10,8 @@ import torch
 from torch_utils import device
 import argparse
 
-def make_metadata(dataset_dir = 'training_set'):
-    C = D_VECTOR(dim_input=80, dim_cell=768, dim_emb=256).eval().to(device)
+def load_speaker_embedding_model():
+    C = D_VECTOR(dim_input=80, dim_cell=768, dim_emb=256).to(device)
     if torch.cuda.is_available():
         c_checkpoint = torch.load('3000000-BL.ckpt')
     else:
@@ -21,8 +21,15 @@ def make_metadata(dataset_dir = 'training_set'):
         new_key = key[7:]
         new_state_dict[new_key] = val
     C.load_state_dict(new_state_dict)
+    return C
+
+
+def make_metadata(dataset_dir = 'training_set'):
+
     num_uttrs = 10
     len_crop = 128
+
+    C = load_speaker_embedding_model().eval()
 
     # Directory containing mel-spectrograms
     rootDir = dataset_dir + '/spmel'

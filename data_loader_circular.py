@@ -18,7 +18,7 @@ class Utterances(data.Dataset):
         self.len_crop = len_crop
         self.step = 10
 
-        metaname = os.path.join(self.root_dir, "train_circular.pkl")
+        metaname = os.path.join(self.root_dir, "train.pkl")
         meta = pickle.load(open(metaname, "rb"))
 
         """Load data using multiprocessing"""
@@ -38,7 +38,7 @@ class Utterances(data.Dataset):
         self.train_dataset = list(dataset)
         self.num_tokens = len(self.train_dataset)
 
-        print('Finished loading the dataset...')
+        print(f'Finished loading the dataset...')
 
 
     def load_data(self, submeta, dataset, idx_offset):
@@ -55,12 +55,14 @@ class Utterances(data.Dataset):
     def __getitem__(self, index):
         # pick a random speaker
         dataset = self.train_dataset
-        list_uttrs = dataset[index]
-        emb_spk = list_uttrs[1]
-        emb_trgt = list_uttrs[3]
+        index_org, index_trgt = np.random.choice(range(len(dataset)), 2, replace=False)
+        list_uttrs_org, list_uttrs_trgt = dataset[index_org], dataset[index_trgt]
+        emb_org = list_uttrs_org[1]
+        emb_trgt = list_uttrs_trgt[1]
+
         # pick random uttr with random crop
-        a = np.random.randint(4, len(list_uttrs))
-        tmp = list_uttrs[a]
+        a = np.random.randint(4, len(list_uttrs_org))
+        tmp = list_uttrs_org[a]
         if tmp.shape[0] < self.len_crop:
             len_pad = self.len_crop - tmp.shape[0]
             uttr = np.pad(tmp, ((0,len_pad),(0,0)), 'constant')
@@ -70,12 +72,11 @@ class Utterances(data.Dataset):
         else:
             uttr = tmp
 
-        return uttr, emb_spk, emb_trgt
-
+        return uttr, emb_org, emb_trgt
 
     def __len__(self):
-        """Return the number of spkrs."""
-        return self.num_tokens
+        """Return the number of spkrs combinations."""
+        return (self.num_tokens * (self.num_tokens - 1))
 
 
 
