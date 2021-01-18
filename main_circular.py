@@ -15,7 +15,7 @@ def main(config):
     # Data loader.
     vcc_loader = get_loader(config.dataset + '/spmel', config.batch_size, config.len_crop)
 
-    solver = Solver(vcc_loader, config, use_speaker_loss=config.use_speaker_loss)
+    solver = Solver(vcc_loader, config)
 
     solver.train()
     solver.save_model(config.dataset + '/' + config.checkpoint)
@@ -51,6 +51,7 @@ if __name__ == '__main__':
     print('use device: ', device)
     # Miscellaneous.
     parser.add_argument('--log_step', type=int, default=100)
+    parser.add_argument('--learning_rate', type=float, default=0.0001)
 
     config = parser.parse_args()
     print(config)
