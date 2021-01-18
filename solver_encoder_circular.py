@@ -119,6 +119,7 @@ class Solver(object):
         try:
             start_time = time.time()
             g_loss_target_style = torch.Tensor([0]).to(self.device)
+            loss = {}
             for i in range(self.init_iter, self.init_iter + self.num_iters):
 
                 # =================================================================================== #
@@ -172,13 +173,12 @@ class Solver(object):
                 self.g_optimizer.step()
 
                 # Logging.
-                loss = {}
-                loss['G/loss'] = g_loss.item()
-                loss['G/loss_id'] = g_loss_id.item()
-                loss['G/loss_id_psnt'] = g_loss_id_psnt.item()
-                loss['G/loss_cd'] = g_loss_cd.item()
+                loss['G/loss'] = g_loss.item() + loss.get('G/loss', 0)
+                loss['G/loss_id'] = g_loss_id.item() + loss.get('G/loss_id', 0)
+                loss['G/loss_id_psnt'] = g_loss_id_psnt.item() + loss.get('G/loss_id_psnt', 0)
+                loss['G/loss_cd'] = g_loss_cd.item() + loss.get('G/loss_cd', 0)
                 if self.use_speaker_loss:
-                    loss['G/loss_tgt_style'] = g_loss_target_style.item()
+                    loss['G/loss_tgt_style'] = g_loss_target_style.item() + loss.get('G/loss_tgt_style', 0)
 
                 # =================================================================================== #
                 #                                 4. Miscellaneous                                    #
@@ -190,8 +190,9 @@ class Solver(object):
                     et = str(datetime.timedelta(seconds=et))[:-7]
                     log = "Elapsed [{}], Iteration [{}/{}]".format(et, i+1, self.num_iters)
                     for tag in keys:
-                        log += ", {}: {:.4f}".format(tag, loss[tag])
+                        log += ", {}: {:.4f}".format(tag, loss[tag]/self.log_step)
                     print(log)
+                    loss = {}
 
                 if self.saving_pace!=0 and (i+1) % self.saving_pace == 0:
                     if not os.path.exists('./trained_models'):
