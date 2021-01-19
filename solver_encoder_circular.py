@@ -113,12 +113,13 @@ class Solver(object):
 
         # Print logs in specified order
         keys = ['G/loss', 'G/loss_id','G/loss_id_psnt','G/loss_cd']
+        if self.use_speaker_loss:
+            keys.append('G/loss_tgt_style')
 
         # Start training.
         print('Start training...')
         try:
             start_time = time.time()
-            g_loss_target_style = torch.Tensor([0]).to(self.device)
             loss = {}
             for i in range(self.init_iter, self.init_iter + self.num_iters):
 
@@ -152,33 +153,39 @@ class Solver(object):
                 x_real_reshaped = x_real.reshape((x_real.shape[0],1,x_real.shape[1],x_real.shape[2]))
                 g_loss_id = F.mse_loss(x_real_reshaped, x_org_reconst)
                 g_loss_id_psnt = F.mse_loss(x_real_reshaped, x_org_reconst_psnt)
-                del x_real_reshaped
 
                 # Code semantic loss.
                 g_loss_cd = F.l1_loss(code_org, code_target_pred)
 
                 # Output style domain loss
+
+                g_loss_target_style = torch.Tensor([0]).to(self.device)
                 if self.use_speaker_loss:
                     emb_target_pred = self.speaker_embedder(x_target_pred_psnt.reshape(x_real.shape)).to(self.device)
                     g_loss_target_style = F.l1_loss(emb_target_pred, emb_target)
 
-                # del x_real, emb_org, x_identic, x_identic_psnt
+
+                del x_real, x_real_reshaped, emb_org, x_org_reconst, x_org_reconst_psnt, x_target_pred, x_target_pred_psnt, code_org
 
 
                 # Backward and optimize.
                 g_loss = g_loss_id + g_loss_id_psnt + g_loss_target_style + self.lambda_cd * g_loss_cd
-                self.loss.append(g_loss.item())
-                self.reset_grad()
-                g_loss.backward()
-                self.g_optimizer.step()
 
                 # Logging.
                 loss['G/loss'] = g_loss.item() + loss.get('G/loss', 0)
                 loss['G/loss_id'] = g_loss_id.item() + loss.get('G/loss_id', 0)
                 loss['G/loss_id_psnt'] = g_loss_id_psnt.item() + loss.get('G/loss_id_psnt', 0)
                 loss['G/loss_cd'] = g_loss_cd.item() + loss.get('G/loss_cd', 0)
-                if self.use_speaker_loss == 1:
-                    loss['G/loss_tgt_style'] = g_loss_target_style.item() + loss.get('G/loss_tgt_style', 0)
+                loss['G/loss_tgt_style'] = g_loss_target_style.item() + loss.get('G/loss_tgt_style', 0)
+
+                del g_loss_id, g_loss_id_psnt, g_loss_cd, g_loss_target_style
+
+                self.loss.append(g_loss.item())
+                self.reset_grad()
+                g_loss.backward()
+                self.g_optimizer.step()
+
+
 
                 # =================================================================================== #
                 #                                 4. Miscellaneous                                    #
