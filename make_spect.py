@@ -6,6 +6,7 @@ from scipy import signal
 from scipy.signal import get_window
 from librosa.filters import mel
 from librosa.core import load
+import matplotlib.pyplot as plt
 from numpy.random import RandomState
 import argparse
 import tqdm
@@ -41,7 +42,6 @@ def to_spec(wav_path, target_path,a, b, mel_basis, min_level):
     # Remove drifting noise
     y = signal.filtfilt(b, a, x)
 
-    sf.write(f'post_filtering.wav', y, samplerate=16000)
     # Ddd a little random noise for model roubstness
     wav = y * 0.96 + (prng.rand(y.shape[0])-0.5)*1e-06
     # Compute spect
@@ -50,6 +50,8 @@ def to_spec(wav_path, target_path,a, b, mel_basis, min_level):
     D_mel = np.dot(D, mel_basis)
     D_db = 20 * np.log10(np.maximum(min_level, D_mel)) - 16
     S = np.clip((D_db + 100) / 100, 0, 1)
+    plt.imshow(S.T)
+    plt.show()
     # save spect
     np.save(target_path, S.astype(np.float32), allow_pickle=False)
 
@@ -81,8 +83,8 @@ def make_spec(datasetDir = "training_set"):
             if len(dirName.split('/')):
                 subfolder = dirName.split('/')[-1]
             for fileName in files:
-                if os.path.exists(os.path.join(targetDirName, subfolder+fileName[:-4]+'.npy')):
-                    continue
+                #if os.path.exists(os.path.join(targetDirName, subfolder+fileName[:-4]+'.npy')):
+                    #continue
                 #prng = RandomState(int(subdir[1:]))
                 to_spec(os.path.join(dirName,fileName), os.path.join(targetDirName, subfolder+fileName[:-4]),a, b, mel_basis, min_level)
 
