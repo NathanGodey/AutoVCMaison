@@ -50,8 +50,6 @@ def to_spec(wav_path, target_path,a, b, mel_basis, min_level):
     D_mel = np.dot(D, mel_basis)
     D_db = 20 * np.log10(np.maximum(min_level, D_mel)) - 16
     S = np.clip((D_db + 100) / 100, 0, 1)
-    plt.imshow(S.T)
-    plt.show()
     # save spect
     np.save(target_path, S.astype(np.float32), allow_pickle=False)
 
