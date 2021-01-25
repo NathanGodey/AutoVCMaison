@@ -151,8 +151,8 @@ class Solver(object):
                 x_target_pred, x_target_pred_psnt, code_org = self.G(x_real, emb_org, emb_target)
                 x_org_reconst, x_org_reconst_psnt, code_target_pred = self.G(x_target_pred.reshape(x_real.shape), emb_target, emb_org)
                 x_real_reshaped = x_real.reshape((x_real.shape[0],1,x_real.shape[1],x_real.shape[2]))
-                g_loss_id = F.l1_loss(x_real_reshaped, x_org_reconst)
-                g_loss_id_psnt = F.l1_loss(x_real_reshaped, x_org_reconst_psnt)
+                g_loss_id = F.mse_loss(x_real_reshaped, x_org_reconst)
+                g_loss_id_psnt = F.mse_loss(x_real_reshaped, x_org_reconst_psnt)
 
                 # Code semantic loss.
                 g_loss_cd = F.l1_loss(code_org, code_target_pred)
