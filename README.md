@@ -49,7 +49,7 @@ We have included a small set of training audio files in the wav folder. However,
 
 2.Generate training metadata, including the GE2E speaker embedding (please use one-hot embeddings if you are not doing zero-shot conversion): ```py .\make_metadata.py --dataset='voxceleb'```
 
-3.Run the main training script: ```python main.py``` or ```python main_circular.py``` for CycleAutoVC
+3.Run the main training script: ```python main.py``` or ```python main_circular.py``` for CycleAutoVC. You can provide several parameters for the training in the bash command (learning rate, dataset, bottleneck dimension, ...). To display the list of parameters : ```python main(_circular).py -h```
 
 Converges when the reconstruction loss is around 0.0001.
 
