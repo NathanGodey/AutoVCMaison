@@ -1,19 +1,7 @@
-## AUTOVC: Zero-Shot Voice Style Transfer with Only Autoencoder Loss
-
-## Checkout our new project: Unsupervised Speech Decomposition for Rhythm, Pitch, and Timbre Conversion https://github.com/auspicious3000/SpeechSplit
-
-This repository provides a PyTorch implementation of AUTOVC.
-
-AUTOVC is a many-to-many non-parallel voice conversion framework. 
-
-If you find this work useful and use it in your research, please consider citing our paper.
-
-```
-@InProceedings{pmlr-v97-qian19c, title = {{A}uto{VC}: Zero-Shot Voice Style Transfer with Only Autoencoder Loss}, author = {Qian, Kaizhi and Zhang, Yang and Chang, Shiyu and Yang, Xuesong and Hasegawa-Johnson, Mark}, pages = {5210--5219}, year = {2019}, editor = {Kamalika Chaudhuri and Ruslan Salakhutdinov}, volume = {97}, series = {Proceedings of Machine Learning Research}, address = {Long Beach, California, USA}, month = {09--15 Jun}, publisher = {PMLR}, pdf = {http://proceedings.mlr.press/v97/qian19c/qian19c.pdf}, url = {http://proceedings.mlr.press/v97/qian19c.html} }
-```
+## CYCLEAUTOVC: Cycle-Consistent Auto-Encoder For Few-Shot Voice Conversion
 
 
-### Audio Demo
+### Audio Demo of AutoVC (from authors)
 
 The audio demo for AUTOVC can be found [here](https://auspicious3000.github.io/autovc-demo/)
 
@@ -50,8 +38,6 @@ We have included a small set of training audio files in the wav folder. However,
 2.Generate training metadata, including the GE2E speaker embedding (please use one-hot embeddings if you are not doing zero-shot conversion): ```py .\make_metadata.py --dataset='voxceleb'```
 
 3.Run the main training script: ```python main.py``` or ```python main_circular.py``` for CycleAutoVC. You can provide several parameters for the training in the bash command (learning rate, dataset, bottleneck dimension, ...). To display the list of parameters : ```python main(_circular).py -h```
-
-Converges when the reconstruction loss is around 0.0001.
 
 
 
