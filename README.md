@@ -1,7 +1,8 @@
-## CYCLEAUTOVC: Cycle-Consistent Auto-Encoder For Few-Shot Voice Conversion
+## <a href=https://github.com/NathanGodey/AutoVCMaison/blob/main/CycleAutoVC_REPORT.pdf>CYCLEAUTOVC: Cycle-Consistent Auto-Encoder For Few-Shot Voice Conversion</a>
 
+This work is the main assignment for the CentraleSupelec course <i>Deep Learning</i> led by Valentin Petit and Maria Vakalopolou. You can find the report <a href=https://github.com/NathanGodey/AutoVCMaison/blob/main/CycleAutoVC_REPORT.pdf>HERE</a>.
 
-### Audio Demo of AutoVC (from authors)
+### Audio Demo of AutoVC (from original authors)
 
 The audio demo for AUTOVC can be found [here](https://auspicious3000.github.io/autovc-demo/)
 
